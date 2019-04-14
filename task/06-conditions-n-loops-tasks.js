@@ -30,7 +30,15 @@
  *
  */
 function getFizzBuzz(num) {
-    throw new Error('Not implemented');
+    let result = num;
+    if ((num % 3 === 0) && (num % 5 === 0)) {
+        result = 'FizzBuzz';
+    } else if (num % 3 === 0) {
+        result = 'Fizz';
+    } else if (num % 5 === 0) {
+        result = 'Buzz';
+    }
+    return result;
 }
 
 
@@ -46,7 +54,12 @@ function getFizzBuzz(num) {
  *   10 => 3628800
  */
 function getFactorial(n) {
-    throw new Error('Not implemented');
+    let factorial = 1;
+    while (n > 1) {
+        factorial *= n;
+        n -=1;
+    }
+    return factorial;
 }
 
 
@@ -63,7 +76,11 @@ function getFactorial(n) {
  *   -1,1  =>  0  ( = -1 + 0 + 1 )
  */
 function getSumBetweenNumbers(n1, n2) {
-    throw new Error('Not implemented');
+    let result = 0;
+    for (let i = n1; i <= n2; i++) {
+        result += i;
+    }
+    return result;
 }
 
 
@@ -82,7 +99,7 @@ function getSumBetweenNumbers(n1, n2) {
  *   10,10,10 =>  true
  */
 function isTriangle(a,b,c) {
-    throw new Error('Not implemented');
+    return ((a + b) > c) && (( a + c) > b) && ((b + c) > a);
 }
 
 
@@ -119,8 +136,88 @@ function isTriangle(a,b,c) {
  *  
  */
 function doRectanglesOverlap(rect1, rect2) {
-    throw new Error('Not implemented');
+    const isInPoly = function (point, polygonPoints) {
+        const { x, y } = point;
+        const poly = polygonPoints;
+        const npol = poly.length;
+        let j = npol - 1;
+        let c = 0;
+        for (let i = 0; i < npol; i++) {
+            if ((((poly[i].y<=y) && (y<poly[j].y)) || ((poly[j].y<=y) && (y<poly[i].y))) &&
+            (x > (poly[j].x - poly[i].x) * (y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x)) {
+                c = !c
+            }
+            j = i;
+        }
+        return c;
+    };
+
+    const isOnLine = function (point, polygonPoints) {
+        let isEqualHead = false;
+        const pointsWidthEqualCoodsX = [];
+        const pointsWidthEqualCoodsY = [];
+
+        polygonPoints.forEach(polyPoint => {
+            isEqualHead = polyPoint.x === point.x && polyPoint.y === point.y;
+            if (polyPoint.x === point.x) {
+                pointsWidthEqualCoodsX.push(polyPoint);
+            } else if (polyPoint.y === point.y) {
+                pointsWidthEqualCoodsY.push(polyPoint);
+            }
+        });
+        if (isEqualHead) return true;
+        if (pointsWidthEqualCoodsX.length === 2) {
+            const yPoses = pointsWidthEqualCoodsX.map(point => point.y);
+            return (point.y > Math.min(...yPoses) && point.y < Math.max(...yPoses))
+        }
+        if (pointsWidthEqualCoodsY.length === 2) {
+            const xPoses = pointsWidthEqualCoodsY.map(point => point.x);
+            return (point.x > Math.min(...xPoses) && point.x < Math.max(...xPoses))
+        }
+    };
+
+    const getRectHeads = (rect) =>
+        [
+            { x: rect.left, y: -rect.top},
+            { x: rect.left + rect.width, y: -rect.top},
+            { x: rect.left, y: -rect.top - rect.height},
+            { x: rect.left + rect.width, y: -rect.top - rect.height},
+        ];
+
+    const getRectLimits = (rect) => {
+        return {
+            x1: rect.left,
+            x2: rect.left + rect.width,
+            y1: -rect.top,
+            y2: -rect.top - rect.height,
+        };
+    };
+
+    const rectanglesHeads = [rect1, rect2].map(rect => getRectHeads(rect));
+    const rectanglesLimits = [rect1, rect2].map(rect => getRectLimits(rect));
+    // const isRect1InRect2 = rectanglesHeads[0].some(point => isInPoly(point, rectanglesHeads[1]) || isOnLine(point, rectanglesHeads[1]));
+    // const isRect2InRect1 = rectanglesHeads[1].some(point => isInPoly(point, rectanglesHeads[0]) || isOnLine(point, rectanglesHeads[0]));
+
+    const isRect1InRect2 = rectanglesHeads[0].some(point => {
+        const isIn = (point.x >= rectanglesLimits[1].x1)
+            && (point.x <= rectanglesLimits[1].x2)
+            && (point.y <= rectanglesLimits[1].y1)
+            && (point.y >= rectanglesLimits[1].y2);
+        return isIn;
+    });
+
+    const isRect2InRect1 = rectanglesHeads[1].some(point => {
+        const isIn = (point.x >= rectanglesLimits[0].x1) 
+            && (point.x <= rectanglesLimits[0].x2) 
+            && (point.y <= rectanglesLimits[0].y1) 
+            && (point.y >= rectanglesLimits[0].y2);
+        return isIn;
+    });
+    const isOverlap = isRect1InRect2 || isRect2InRect1;
+    return isOverlap;
 }
+
+
 
 
 /**
@@ -150,8 +247,9 @@ function doRectanglesOverlap(rect1, rect2) {
  *   
  */
 function isInsideCircle(circle, point) {
-    throw new Error('Not implemented');
-}
+    const lengthFromCenter = Math.sqrt((circle.center.x - point.x) ** 2 + (circle.center.y - point.y) ** 2);
+    return lengthFromCenter < circle.radius;
+} 
 
 
 /**
@@ -166,7 +264,16 @@ function isInsideCircle(circle, point) {
  *   'entente' => null
  */
 function findFirstSingleChar(str) {
-    throw new Error('Not implemented');
+    let i = 0;
+    while (i < str.length) {
+        if (str.indexOf(str[i]) === i) {
+            if (str.indexOf(str[i], i + 1) === -1) {
+                return str[i];
+            }
+        }
+        i += 1;
+    }
+    return null;
 }
 
 
@@ -192,7 +299,9 @@ function findFirstSingleChar(str) {
  *
  */
 function getIntervalString(a, b, isStartIncluded, isEndIncluded) {
-    throw new Error('Not implemented');
+    const startBracet = isStartIncluded ? '[' : '(';
+    const endBracet = isEndIncluded ? ']' : ')';
+    return `${startBracet}${Math.min(a, b)}, ${Math.max(a, b)}${endBracet}`;
 }
 
 
@@ -209,7 +318,9 @@ function getIntervalString(a, b, isStartIncluded, isEndIncluded) {
  * 'noon' => 'noon'
  */
 function reverseString(str) {
-    throw new Error('Not implemented');
+    const letters = str.split('');
+    letters.reverse();
+    return letters.join('');
 }
 
 
@@ -226,7 +337,9 @@ function reverseString(str) {
  *   34143 => 34143
  */
 function reverseInteger(num) {
-    throw new Error('Not implemented');
+    const letters = String(num).split('');
+    letters.reverse();
+    return letters.join('');
 }
 
 
@@ -251,7 +364,24 @@ function reverseInteger(num) {
  *   4916123456789012 => false
  */
 function isCreditCardNumber(ccn) {
-    throw new Error('Not implemented');
+    const digits = String(ccn);
+    let sum = 0;
+    
+    for (let i = 0; i < digits.length; i++) {
+        let cardNum = parseInt(digits[i]);
+    
+        if ((digits.length - i) % 2 === 0) {
+            cardNum = cardNum * 2;
+        
+            if (cardNum > 9) {
+                cardNum = cardNum - 9;
+            }
+        }
+    
+        sum += cardNum;
+    }
+    
+    return sum % 10 === 0;
 }
 
 
@@ -270,7 +400,13 @@ function isCreditCardNumber(ccn) {
  *   165536 (1+6+5+5+3+6 = 26,  2+6 = 8) => 8
  */
 function getDigitalRoot(num) {
-    throw new Error('Not implemented');
+    const middleSum = String(num)
+        .split('')
+        .reduce((sum, cur) => sum += +cur, 0);
+    return  String(middleSum)
+        .split('')
+        .reduce((sum, cur) => sum += +cur, 0);
+
 }
 
 
@@ -296,7 +432,51 @@ function getDigitalRoot(num) {
  *   '{[(<{[]}>)]}' = true 
  */
 function isBracketsBalanced(str) {
-    throw new Error('Not implemented');
+    const bracketsConfig = [['(', ')'], ['{', '}'], ['<', '>'], ['[', ']']];
+    let curObj = {
+        needClose: null,
+      };
+      let pointer = 0;
+      let isCorrect = true;
+    
+      const getNextLevelObj = (parent, bracetsType) => {
+        return {
+          parent,
+          needClose: bracetsType,
+        };
+      };
+    
+      const getPrevLevelObj = (obj) => obj.parent;
+    
+      while (pointer < str.length) {
+        const char = str[pointer];
+        const bracetsIndex = bracketsConfig.findIndex(subArr => subArr.includes(char));
+    
+        if (bracketsConfig[bracetsIndex][0] === bracketsConfig[bracetsIndex][1]) {
+          if (curObj.needClose === bracetsIndex) {
+            curObj = getPrevLevelObj(curObj);
+          } else {
+            curObj = getNextLevelObj(curObj, bracetsIndex);
+          }
+        } else if (bracketsConfig[bracetsIndex].indexOf(char) === 0) {
+          curObj = getNextLevelObj(curObj, bracetsIndex);
+        } else if (
+          bracketsConfig[bracetsIndex].indexOf(char) === 1 // если символ - закрывающая скобка и её ожидали, то возвращаемся к родителю, иначе ошибка
+          && curObj.needClose === bracetsIndex
+        ) {
+          curObj = getPrevLevelObj(curObj);
+        } else {
+          isCorrect = false;
+          break;
+        }
+    
+        pointer += 1;
+      }
+    
+    if (curObj.needClose !== null) { // если не вернулись к родителю, то что-то не закрыто
+        isCorrect = false;
+    }
+    return isCorrect;
 }
 
 
@@ -356,7 +536,7 @@ function timespanToHumanString(startDate, endDate) {
  *    365, 10 => '365'
  */
 function toNaryString(num, n) {
-    throw new Error('Not implemented');
+    return num.toString(n);
 }
 
 

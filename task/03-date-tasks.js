@@ -22,7 +22,7 @@
  *    'Sun, 17 May 1998 03:00:00 GMT+01' => Date()
  */
 function parseDataFromRfc2822(value) {
-   throw new Error('Not implemented');
+   return new Date(value);
 }
 
 /**
@@ -37,7 +37,7 @@ function parseDataFromRfc2822(value) {
  *    '2016-01-19T08:07:37Z' => Date()
  */
 function parseDataFromIso8601(value) {
-   throw new Error('Not implemented');
+   return new Date(value);
 }
 
 
@@ -56,7 +56,16 @@ function parseDataFromIso8601(value) {
  *    Date(2015,1,1)    => false
  */
 function isLeapYear(date) {
-   throw new Error('Not implemented');
+   const year = date.getFullYear();
+   let isLeap = false;
+   if (year % 400 === 0) {
+      isLeap = true;
+   } else if (year % 4 === 0) {
+      isLeap = true;
+      if (year % 100 === 0) isLeap = false;
+   }
+
+   return isLeap;
 }
 
 
@@ -76,7 +85,8 @@ function isLeapYear(date) {
  *    Date(2000,1,1,10,0,0),  Date(2000,1,1,15,20,10,453)   => "05:20:10.453"
  */
 function timeSpanToString(startDate, endDate) {
-   throw new Error('Not implemented');
+   const timeSpan = new Date(endDate.getTime() - startDate.getTime());
+   return timeSpan.toISOString().slice(-13, -1);
 }
 
 
@@ -94,9 +104,23 @@ function timeSpanToString(startDate, endDate) {
  *    Date.UTC(2016,3,5,21, 0) => Math.PI/2
  */
 function angleBetweenClockHands(date) {
-    throw new Error('Not implemented');
-}
+   const minutes = date.getMinutes();
+   let hours = date.getUTCHours();
+   if (hours > 12) hours = hours - 12;
 
+   const addHours = (Math.PI / 6) * (minutes / 60);
+   const angle = {
+      minutes: (minutes * 2 * Math.PI) / 60,
+      hours: ((hours * 2 * Math.PI) / 12) + addHours,
+   };
+   Object.keys(angle).forEach(key => {
+      if (angle[key] > Math.PI) {
+         angle[key] = angle[key] - Math.PI;
+      }
+   });
+   
+   return Math.abs(angle.minutes - angle.hours);
+}
 
 module.exports = {
     parseDataFromRfc2822: parseDataFromRfc2822,
